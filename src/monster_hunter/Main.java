@@ -13,8 +13,8 @@ public class Main {
 			System.out.println("1. Borrar tablas e información");
 			System.out.println("2. Crear tablas");
 			System.out.println("3. Poblar tablas desde archivos");
-			// ... Agrega más opciones según tus necesidades
-
+			System.out.println("4. Consultar elementos por texto");
+			System.out.println("5. Modificar descripción de un monstruo por ID");
 			System.out.println("0. Salir");
 			System.out.print("Selecciona una opción: ");
 
@@ -35,6 +35,29 @@ public class Main {
 					connection = ConnectionFactory.getInstance().connect();
 					TablaController.populateFromXML("monstruos.xml");
 					break;
+
+				case 4:
+					connection = ConnectionFactory.getInstance().connect();
+					System.out.print("Ingrese el texto de búsqueda: ");
+					String searchText = scanner.nextLine();
+					TablaController.selectElementsByText(searchText);
+					break;
+
+				case 5:
+					connection = ConnectionFactory.getInstance().connect();
+					System.out.println("Introduce el ID del monstruo a modificar:");
+					int monstruoID;
+					try {
+						monstruoID = Integer.parseInt(scanner.nextLine());
+					} catch (NumberFormatException e) {
+						System.out.println("Entrada no válida. El ID debe ser un número entero.");
+						break;
+					}
+					System.out.println("Introduce la nueva descripción:");
+					String nuevaDescripcion = scanner.nextLine();
+					TablaController.updateMonstruoDescription(monstruoID, nuevaDescripcion);
+					break;
+
 
 				case 0:
 					exit = true;
