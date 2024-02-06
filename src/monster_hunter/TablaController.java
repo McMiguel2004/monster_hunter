@@ -20,22 +20,37 @@ public class TablaController {
             connection = ConnectionFactory.getInstance().connect();
             statement = connection.createStatement();
 
-            // Definir las sentencias SQL para la creación de tablas
-            String createMonstruosTable = "CREATE TABLE IF NOT EXISTS Monstruos ("
-                    + "MonstruoID SERIAL PRIMARY KEY,"
-                    + "Nombre VARCHAR(255) NOT NULL,"
-                    + "Imagen VARCHAR(255) NOT NULL,"
-                    + "Descripcion TEXT NOT NULL)";
+            // Crear tablas en el orden correcto
+            String createSpeciesTable = "CREATE TABLE IF NOT EXISTS Species ("
+                    + "id SERIAL PRIMARY KEY,"
+                    + "name VARCHAR(255) NOT NULL,"
+                    + "description TEXT NOT NULL,"
+                    + "monstruo_id INT REFERENCES Monstruo(id))";
 
-            String createSubDescripcionTable = "CREATE TABLE IF NOT EXISTS SubDescripcion ("
-                    + "SubDescripcionID SERIAL PRIMARY KEY,"
-                    + "MonstruoID INT,"
-                    + "Descripcion TEXT NOT NULL,"
-                    + "FOREIGN KEY (MonstruoID) REFERENCES Monstruos(MonstruoID))";
+            String createLocationTable = "CREATE TABLE IF NOT EXISTS Location ("
+                    + "id SERIAL PRIMARY KEY,"
+                    + "name VARCHAR(255) NOT NULL,"
+                    + "description TEXT NOT NULL,"
+                    + "monstruo_id INT REFERENCES Monstruo(id))";
 
-            // Ejecutar las sentencias SQL
-            statement.executeUpdate(createMonstruosTable);
-            statement.executeUpdate(createSubDescripcionTable);
+            String createMonstruoTable = "CREATE TABLE IF NOT EXISTS Monstruo ("
+                    + "id SERIAL PRIMARY KEY,"
+                    + "nombre VARCHAR(255) NOT NULL,"
+                    + "imagen VARCHAR(255) NOT NULL,"
+                    + "descripcion TEXT NOT NULL,"
+                    + "species_id INT REFERENCES Species(id),"
+                    + "location_id INT REFERENCES Location(id))";
+
+            String createElementsTable = "CREATE TABLE IF NOT EXISTS Elements ("
+                    + "id SERIAL PRIMARY KEY,"
+                    + "element_name VARCHAR(255) NOT NULL,"
+                    + "monstruo_id INT REFERENCES Monstruo(id))";
+
+            // Ejecutar las sentencias SQL en el orden correcto
+            statement.executeUpdate(createSpeciesTable);
+            statement.executeUpdate(createLocationTable);
+            statement.executeUpdate(createMonstruoTable);
+            statement.executeUpdate(createElementsTable);
 
             System.out.println("Tablas creadas exitosamente.");
         } catch (SQLException e) {
@@ -56,7 +71,10 @@ public class TablaController {
     }
 
 
-    // Eliminar tablas
+
+
+
+    // Eliminar todas las tablas
     public static void dropTables() {
         Connection connection = null;
         Statement statement = null;
@@ -65,15 +83,19 @@ public class TablaController {
             connection = ConnectionFactory.getInstance().connect();
             statement = connection.createStatement();
 
-            // Definir las sentencias SQL para eliminar las tablas
-            String dropMonstruosTable = "DROP TABLE IF EXISTS Monstruos";
-            String dropSubDescripcionTable = "DROP TABLE IF EXISTS SubDescripcion";
+            // Definir las sentencias SQL para eliminar todas las tablas
+            String dropElementsTable = "DROP TABLE IF EXISTS Elements";
+            String dropSpeciesTable = "DROP TABLE IF EXISTS Species";
+            String dropLocationTable = "DROP TABLE IF EXISTS Location";
+            String dropMonstruoTable = "DROP TABLE IF EXISTS Monstruo CASCADE"; // Agregar CASCADE
 
             // Ejecutar las sentencias SQL
-            statement.executeUpdate(dropSubDescripcionTable);
-            statement.executeUpdate(dropMonstruosTable);
+            statement.executeUpdate(dropElementsTable);
+            statement.executeUpdate(dropSpeciesTable);
+            statement.executeUpdate(dropLocationTable);
+            statement.executeUpdate(dropMonstruoTable);
 
-            System.out.println("Tablas eliminadas exitosamente.");
+            System.out.println("Todas las tablas han sido eliminadas exitosamente.");
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -91,6 +113,7 @@ public class TablaController {
         }
     }
 
+
     public static void populateFromXML(String xmlFilePath) {
         Connection connection = null;
         try {
@@ -104,12 +127,18 @@ public class TablaController {
 
             NodeList monstruoList = doc.getElementsByTagName("Monstruo");
 
-            String insertMonstruo = "INSERT INTO Monstruos (Nombre, Imagen, Descripcion) VALUES (?, ?, ?)";
-            String insertSubDescripcion = "INSERT INTO SubDescripcion (MonstruoID, SubDescripcionID, Descripcion) VALUES (?, ?, ?)";
-            PreparedStatement preparedStatementMonstruo = connection.prepareStatement(insertMonstruo, Statement.RETURN_GENERATED_KEYS);
-            PreparedStatement preparedStatementSubDescripcion = connection.prepareStatement(insertSubDescripcion);
+            String insertMonstruo = "INSERT INTO Monstruo (nombre, imagen, descripcion, species_id, location_id) VALUES (?, ?, ?, ?, ?)";
+            String insertSpecies = "INSERT INTO Species (name, description) VALUES (?, ?)";
+            String insertElements = "INSERT INTO Elements (monstruo_id, element_name) VALUES (?, ?)";
+            String insertLocation = "INSERT INTO Location (name, description) VALUES (?, ?)";
 
-            int subDescripcionID = 1; // Inicializar el contador de SubDescripcionID fuera del bucle principal
+            PreparedStatement preparedStatementMonstruo = connection.prepareStatement(insertMonstruo);
+            PreparedStatement preparedStatementSpecies = connection.prepareStatement(insertSpecies, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement preparedStatementElements = connection.prepareStatement(insertElements);
+            PreparedStatement preparedStatementLocation = connection.prepareStatement(insertLocation);
+
+            int speciesID;
+            int locationID;
 
             for (int i = 0; i < monstruoList.getLength(); i++) {
                 Node monstruoNode = monstruoList.item(i);
@@ -121,29 +150,37 @@ public class TablaController {
                     String imagen = monstruoElement.getElementsByTagName("Imagen").item(0).getTextContent();
                     String descripcion = monstruoElement.getElementsByTagName("Descripcion").item(0).getTextContent();
 
-                    // Después de insertar la información del monstruo, obtener el ID del monstruo recién insertado
+                    // Obtener o insertar datos en la tabla Species
+                    Element speciesElement = (Element) monstruoElement.getElementsByTagName("Species").item(0);
+                    String speciesName = speciesElement.getElementsByTagName("name").item(0).getTextContent();
+                    String speciesDescription = speciesElement.getElementsByTagName("descripcion").item(0).getTextContent();
+                    speciesID = insertSpeciesAndGetID(connection, speciesName, speciesDescription);
+
+                    // Obtener o insertar datos en la tabla Location
+                    Element locationElement = (Element) monstruoElement.getElementsByTagName("location").item(0);
+                    String locationName = locationElement.getElementsByTagName("name").item(0).getTextContent();
+                    String locationDescription = locationElement.getElementsByTagName("description").item(0).getTextContent();
+                    locationID = insertLocationAndGetID(connection, locationName, locationDescription);
+
+                    // Insertar datos en la tabla Monstruo
                     preparedStatementMonstruo.setString(1, nombre);
                     preparedStatementMonstruo.setString(2, imagen);
                     preparedStatementMonstruo.setString(3, descripcion);
+                    preparedStatementMonstruo.setInt(4, speciesID);
+                    preparedStatementMonstruo.setInt(5, locationID);
                     preparedStatementMonstruo.executeUpdate();
 
                     // Obtener el ID del monstruo insertado
-                    ResultSet generatedKeys = preparedStatementMonstruo.getGeneratedKeys();
-                    int monstruoID;
-                    if (generatedKeys.next()) {
-                        monstruoID = generatedKeys.getInt(1);
-                    } else {
-                        throw new SQLException("Error al obtener el ID del monstruo insertado.");
-                    }
+                    int monstruoID = getLastInsertedID(connection);
 
-                    // Insertar datos en la tabla SubDescripcion utilizando el ID del monstruo
-                    NodeList subDescripcionList = monstruoElement.getElementsByTagName("SubDescripcion");
-                    for (int j = 0; j < subDescripcionList.getLength(); j++) {
-                        String subDescripcion = subDescripcionList.item(j).getTextContent();
-                        preparedStatementSubDescripcion.setInt(1, monstruoID);
-                        preparedStatementSubDescripcion.setInt(2, subDescripcionID++);
-                        preparedStatementSubDescripcion.setString(3, subDescripcion);
-                        preparedStatementSubDescripcion.executeUpdate();
+                    // Insertar datos en la tabla Elements
+                    Element elementsElement = (Element) monstruoElement.getElementsByTagName("Elements").item(0);
+                    NodeList elementList = elementsElement.getElementsByTagName("element");
+                    for (int j = 0; j < elementList.getLength(); j++) {
+                        String elementName = elementList.item(j).getTextContent();
+                        preparedStatementElements.setInt(1, monstruoID);
+                        preparedStatementElements.setString(2, elementName);
+                        preparedStatementElements.executeUpdate();
                     }
                 }
             }
@@ -160,6 +197,61 @@ public class TablaController {
         }
     }
 
+
+    // Método auxiliar para insertar o obtener el ID de una especie
+    private static int insertSpeciesAndGetID(Connection connection, String name, String description) throws SQLException {
+        String selectSpecies = "SELECT id FROM Species WHERE name = ?";
+        String insertSpecies = "INSERT INTO Species (name, description) VALUES (?, ?)";
+
+        PreparedStatement preparedStatementSelect = connection.prepareStatement(selectSpecies);
+        preparedStatementSelect.setString(1, name);
+
+        ResultSet resultSet = preparedStatementSelect.executeQuery();
+
+        if (resultSet.next()) {
+            return resultSet.getInt("id");
+        } else {
+            PreparedStatement preparedStatementInsert = connection.prepareStatement(insertSpecies, Statement.RETURN_GENERATED_KEYS);
+            preparedStatementInsert.setString(1, name);
+            preparedStatementInsert.setString(2, description);
+            preparedStatementInsert.executeUpdate();
+
+            ResultSet generatedKeys = preparedStatementInsert.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                return generatedKeys.getInt(1);
+            } else {
+                throw new SQLException("Error al obtener el ID de Species insertado.");
+            }
+        }
+    }
+
+    // Método auxiliar para insertar o obtener el ID de una ubicación
+    private static int insertLocationAndGetID(Connection connection, String name, String description) throws SQLException {
+        String selectLocation = "SELECT id FROM Location WHERE name = ?";
+        String insertLocation = "INSERT INTO Location (name, description) VALUES (?, ?)";
+
+        PreparedStatement preparedStatementSelect = connection.prepareStatement(selectLocation);
+        preparedStatementSelect.setString(1, name);
+
+        ResultSet resultSet = preparedStatementSelect.executeQuery();
+
+        if (resultSet.next()) {
+            return resultSet.getInt("id");
+        } else {
+            PreparedStatement preparedStatementInsert = connection.prepareStatement(insertLocation, Statement.RETURN_GENERATED_KEYS);
+            preparedStatementInsert.setString(1, name);
+            preparedStatementInsert.setString(2, description);
+            preparedStatementInsert.executeUpdate();
+
+            ResultSet generatedKeys = preparedStatementInsert.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                return generatedKeys.getInt(1);
+            } else {
+                throw new SQLException("Error al obtener el ID de Location insertado.");
+            }
+        }
+    }
+
     // Método auxiliar para obtener el último ID insertado
     private static int getLastInsertedID(Connection connection) throws SQLException {
         int lastID = -1;
@@ -167,7 +259,7 @@ public class TablaController {
         ResultSet resultSet = null;
 
         try {
-            String query = "SELECT LASTVAL()";
+            String query = "SELECT lastval()";
             preparedStatement = connection.prepareStatement(query);
             resultSet = preparedStatement.executeQuery();
 
@@ -185,111 +277,6 @@ public class TablaController {
 
         return lastID;
     }
-
-    public static void selectElementsByText(String searchText) {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-
-        try {
-            connection = ConnectionFactory.getInstance().connect();
-
-            // Consulta SQL para seleccionar elementos que contengan un texto concreto
-            String query = "SELECT * FROM Monstruos WHERE Descripcion LIKE ?";
-            preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, "%" + searchText + "%");
-            resultSet = preparedStatement.executeQuery();
-
-            // Procesar y mostrar resultados
-            while (resultSet.next()) {
-                // Recuperar datos
-                int monstruoID = resultSet.getInt("MonstruoID");
-                String nombre = resultSet.getString("Nombre");
-                String imagen = resultSet.getString("Imagen");
-                String descripcion = resultSet.getString("Descripcion");
-
-                // Mostrar resultados
-                System.out.println("MonstruoID: " + monstruoID);
-                System.out.println("Nombre: " + nombre);
-                System.out.println("Imagen: " + imagen);
-                System.out.println("Descripcion: " + descripcion);
-                System.out.println("-------------------------");
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            // Cerrar recursos
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (connection != null) {
-                ConnectionFactory.getInstance().disconnect();
-            }
-        }
-    }
-
-    // Modificar la descripción de un monstruo por su ID
-    public static void updateMonstruoDescription(int monstruoID, String nuevaDescripcion) {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-
-        try {
-            connection = ConnectionFactory.getInstance().connect();
-
-            // Logs de depuración
-            System.out.println("Actualizando descripción del monstruo con ID: " + monstruoID);
-            System.out.println("Nueva descripción: " + nuevaDescripcion);
-
-            // Consulta SQL para actualizar la descripción del monstruo
-            String updateQuery = "UPDATE Monstruos SET Descripcion = ? WHERE MonstruoID = ?";
-            preparedStatement = connection.prepareStatement(updateQuery);
-
-            // Establecer los parámetros en la consulta
-            preparedStatement.setString(1, nuevaDescripcion);
-            preparedStatement.setInt(2, monstruoID);
-
-            // Logs de depuración
-            System.out.println("Consulta SQL: " + preparedStatement.toString());
-
-            // Ejecutar la actualización
-            int filasAfectadas = preparedStatement.executeUpdate();
-
-            // Verificar si la actualización fue exitosa
-            if (filasAfectadas > 0) {
-                System.out.println("Descripción del monstruo actualizada exitosamente.");
-            } else {
-                System.out.println("No se encontró el monstruo con ID " + monstruoID);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            // Cerrar recursos
-            if (preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (connection != null) {
-                ConnectionFactory.getInstance().disconnect();
-            }
-        }
-    }
-
 
 }
 

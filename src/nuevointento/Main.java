@@ -1,4 +1,5 @@
-package monster_hunter;
+package nuevointento;
+
 
 import java.sql.Connection;
 import java.util.Scanner;
@@ -30,20 +31,10 @@ public class Main {
 					connection = ConnectionFactory.getInstance().connect();
 					TablaController.createTables();
 					break;
-
 				case 3:
 					connection = ConnectionFactory.getInstance().connect();
 					TablaController.populateFromXML("monstruos.xml");
 					break;
-
-				case 4:
-					// Implementa la lógica para consultar elementos por texto
-					break;
-
-				case 5:
-					// Implementa la lógica para modificar descripción de un monstruo por ID
-					break;
-
 				case 0:
 					exit = true;
 					break;
