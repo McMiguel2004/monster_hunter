@@ -48,7 +48,7 @@ public class ConnectionFactory {
 	 */
 	public void init() {
 		Properties prop = new Properties();
-		InputStream propStream = this.getClass().getClassLoader().getResourceAsStream("ACB/db.properties");
+		InputStream propStream = this.getClass().getClassLoader().getResourceAsStream("nuevointento/db.properties");
 
 		try {
 			prop.load(propStream);
