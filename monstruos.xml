@@ -850,4 +850,50 @@
 
   </Monstruo>
 
+  <Monstruo>
+  <Nombre>Dracolisk</Nombre>
+  <Imagen>https://example.com/monster-images/dracolisk.jpg</Imagen>
+  <Descripcion>A majestic wyvern covered in shimmering silver scales. Its grace in flight is matched only by its ferocity in battle, utilizing swift and powerful attacks.</Descripcion>
+  <Species>
+    <name>Elder Dragons</name>
+    <descripcion>Elder Dragons are ancient and powerful creatures that roam the Monster Hunter World (MHW) ecosystem. They possess unique abilities and often play a significant role in the game's storyline.</descripcion>
+  </Species>
+  <Elements>
+    <element1>Fireblight</element1>
+    <element2>Dragonblight</element2>
+    <element3>Thunderblight</element3>
+    <element4>Iceblight</element4>
+    <element5>Waterblight</element5>
+    <element6>Health decreases over time</element6>
+    <!-- Agrega más elementos según sea necesario -->
+  </Elements>
+  <location>
+    <name>The Guiding Lands</name>
+    <description>The Guiding Lands is a diverse and dynamic location in Monster Hunter World (MHW). It features various terrains, each with its unique set of challenges and monsters. Hunters must navigate its ever-changing landscape to face formidable foes.</description>
+  </location>
+  </Monstruo>
+
+  <Monstruo>
+    <Nombre>HammadelExplosivo</Nombre>
+    <Imagen>https://example.com/monster-images/frostfang.jpg</Imagen>
+    <Descripcion>A fearsome brute wyvern, Frostfang, is covered in thick ice crystals. It roams the frosty landscapes with a chilling presence, freezing its prey with each breath.</Descripcion>
+    <Species>
+      <name>Brute Wyverns</name>
+      <descripcion>Brute Wyverns are powerful, heavily built monsters in Monster Hunter World (MHW). They rely on brute strength and physical attacks to overpower their adversaries.</descripcion>
+    </Species>
+    <Elements>
+      <element1>Iceblight</element1>
+      <element2>Dragonblight</element2>
+      <element3>Thunderblight</element3>
+      <element4>Fireblight</element4>
+      <element5>Health decreases over time</element5>
+      <!-- Agrega más elementos según sea necesario -->
+    </Elements>
+    <location>
+      <name>Coral Highlands</name>
+      <description>Coral Highlands is a visually stunning Location in Monster Hunter World (MHW). It is characterized by its vibrant coral formations and unique flora, providing both challenges and opportunities for skilled hunters.</description>
+    </location>
+
+  </Monstruo>
+
 </Monstruos>
