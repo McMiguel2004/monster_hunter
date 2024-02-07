@@ -9,9 +9,14 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.sql.*;
-
+/**
+ * Controlador para realizar operaciones en la base de datos relacionadas con monstruos.
+ */
 public class TablaController {
-
+    /**
+     * Crea las tablas necesarias en la base de datos si no existen.
+     * Las tablas incluyen Monstruo, Elements y Location.
+     */
     public static void createTables() {
         Connection connection = null;
         Statement statement = null;
@@ -67,7 +72,10 @@ public class TablaController {
         }
     }
 
-
+    /**
+     * Elimina todas las tablas de la base de datos, incluyendo Elements y Location,
+     * y utiliza CASCADE para eliminar las referencias a Monstruo.
+     */
     // Eliminar todas las tablas
     public static void dropTables() {
         Connection connection = null;
@@ -104,7 +112,11 @@ public class TablaController {
             }
         }
     }
-
+    /**
+     * Puebla la base de datos con datos provenientes de un archivo XML.
+     *
+     * @param xmlFilePath Ruta del archivo XML que contiene los datos de los monstruos.
+     */
     public static void populateFromXML(String xmlFilePath) {
         Connection connection = null;
         try {
@@ -183,6 +195,13 @@ public class TablaController {
             }
         }
     }
+    /**
+     * Obtiene el contenido de texto de un elemento secundario dentro de un elemento principal.
+     *
+     * @param parentElement Elemento principal que contiene el elemento secundario.
+     * @param tagName       Nombre del elemento secundario cuyo contenido se desea obtener.
+     * @return Contenido de texto del elemento secundario o null si no se encuentra.
+     */
 
     private static String getElementTextContent(Element parentElement, String tagName) {
         if (parentElement != null) {
@@ -193,7 +212,14 @@ public class TablaController {
         }
         return null;
     }
-
+    /**
+     * Inserta datos de elementos asociados a un monstruo en la tabla Elements.
+     *
+     * @param monstruoElement              Elemento XML que representa un monstruo.
+     * @param preparedStatementElements   Declaración preparada para la inserción en la tabla Elements.
+     * @param monstruoID                   ID del monstruo al que pertenecen los elementos.
+     * @throws SQLException               Si hay un error durante la inserción en la tabla Elements.
+     */
     private static void insertElementsData(Element monstruoElement, PreparedStatement preparedStatementElements, int monstruoID) throws SQLException {
         NodeList elementsList = monstruoElement.getElementsByTagName("Elements");
         if (elementsList.getLength() > 0) {
@@ -213,7 +239,14 @@ public class TablaController {
         }
     }
 
-
+    /**
+     * Inserta datos de ubicación asociados a un monstruo en la tabla Location.
+     *
+     * @param monstruoElement              Elemento XML que representa un monstruo.
+     * @param preparedStatementLocation   Declaración preparada para la inserción en la tabla Location.
+     * @param monstruoID                   ID del monstruo al que pertenece la ubicación.
+     * @throws SQLException               Si hay un error durante la inserción en la tabla Location.
+     */
     private static void insertLocationData(Element monstruoElement, PreparedStatement preparedStatementLocation, int monstruoID) throws SQLException {
         NodeList locationList = monstruoElement.getElementsByTagName("location");
         if (locationList.getLength() > 0) {

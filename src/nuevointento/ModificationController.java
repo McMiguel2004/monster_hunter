@@ -4,7 +4,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ * Controlador encargado de las operaciones de modificación en la base de datos.
+ */
 public class ModificationController {
+    /**
+     * Modifica la descripción de un monstruo por su ID.
+     *
+     * @param entityId      ID del monstruo a modificar.
+     * @param newDescription Nueva descripción del monstruo.
+     */
     public static void modifyMonstruoDescriptionById(int entityId, String newDescription) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -28,6 +37,12 @@ public class ModificationController {
             closeResources(preparedStatement, connection);
         }
     }
+    /**
+     * Modifica el nombre de un monstruo por su ID.
+     *
+     * @param entityId ID del monstruo a modificar.
+     * @param newName   Nuevo nombre del monstruo.
+     */
 
     public static void modifyMonstruoNameById(int entityId, String newName) {
         Connection connection = null;
@@ -52,7 +67,12 @@ public class ModificationController {
             closeResources(preparedStatement, connection);
         }
     }
-
+    /**
+     * Modifica el nombre de la ubicación de un monstruo por su ID.
+     *
+     * @param entityId ID del monstruo cuya ubicación se va a modificar.
+     * @param newName   Nuevo nombre de la ubicación del monstruo.
+     */
     public static void modifyLocationNameById(int entityId, String newName) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -77,6 +97,14 @@ public class ModificationController {
         }
     }
 
+    /**
+     * Modifica el nombre, la descripción y la ubicación de un monstruo por su ID.
+     *
+     * @param entityId       ID del monstruo a modificar.
+     * @param newNombre      Nuevo nombre del monstruo.
+     * @param newDescripcion Nueva descripción del monstruo.
+     * @param newLocationName Nuevo nombre de la ubicación del monstruo.
+     */
 
     public static void modifyMonstruoDetails(int entityId, String newNombre, String newDescripcion, String newLocationName) {
         Connection connection = null;
@@ -111,6 +139,12 @@ public class ModificationController {
         }
     }
 
+    /**
+     * Cierra los recursos utilizados en las operaciones de modificación.
+     *
+     * @param preparedStatement PreparedStatement a cerrar.
+     * @param connection        Conexión a la base de datos a cerrar.
+     */
     private static void closeResources(PreparedStatement preparedStatement, Connection connection) {
         if (preparedStatement != null) {
             try {

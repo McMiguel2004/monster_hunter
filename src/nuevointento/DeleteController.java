@@ -4,9 +4,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
-
+/**
+ * Controlador encargado de las operaciones de eliminación en la base de datos.
+ */
 public class DeleteController {
+    /**
+     * Elimina un monstruo y sus referencias en la tabla "elements" por su ID.
+     *
+     * @param entityId ID del monstruo a eliminar.
+     */
     public static void deleteMonstruoById(int entityId) {
+
         Connection connection = null;
         PreparedStatement deleteElements = null;
         PreparedStatement deleteMonstruo = null;
@@ -56,6 +64,11 @@ public class DeleteController {
             closeResourcesForDeleteMonstruoById(connection, deleteElements, deleteMonstruo);
         }
     }
+    /**
+     * Elimina varios monstruos por sus IDs, incluyendo referencias en "elements" y "location".
+     *
+     * @param entityIds Lista de IDs de monstruos a eliminar.
+     */
 
     public static void deleteMonstruosByIds(List<Integer> entityIds) {
         Connection connection = null;
@@ -124,7 +137,13 @@ public class DeleteController {
     }
 
 
-
+    /**
+     * Cierra los recursos utilizados en la operación de eliminar un monstruo por ID.
+     *
+     * @param connection        Conexión a la base de datos.
+     * @param preparedStatement1 Primer PreparedStatement a cerrar.
+     * @param preparedStatement2 Segundo PreparedStatement a cerrar.
+     */
     private static void closeResourcesForDeleteMonstruoById(Connection connection, PreparedStatement preparedStatement1, PreparedStatement preparedStatement2) {
         try {
             if (preparedStatement1 != null) {
@@ -144,7 +163,14 @@ public class DeleteController {
 
         closeConnection(connection);
     }
-
+    /**
+     * Cierra los recursos utilizados en la operación de eliminar varios monstruos por IDs.
+     *
+     * @param connection        Conexión a la base de datos.
+     * @param preparedStatement1 Primer PreparedStatement a cerrar.
+     * @param preparedStatement2 Segundo PreparedStatement a cerrar.
+     * @param preparedStatement3 Tercer PreparedStatement a cerrar.
+     */
     private static void closeResourcesForDeleteMonstruosByIds(Connection connection, PreparedStatement preparedStatement1, PreparedStatement preparedStatement2, PreparedStatement preparedStatement3) {
         try {
             if (preparedStatement1 != null) {
@@ -171,9 +197,11 @@ public class DeleteController {
         }
 
         closeConnection(connection);
-    }
-
-
+    }  /**
+     * Cierra la conexión a la base de datos.
+     *
+     * @param connection Conexión a la base de datos a cerrar.
+     */
 
     // Método para cerrar la conexión
     private static void closeConnection(Connection connection) {

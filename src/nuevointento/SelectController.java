@@ -4,7 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
+/**
+ * Controlador encargado de las operaciones de consulta en la base de datos.
+ */
 public class SelectController {
 
     // Consulta para seleccionar elementos de la tabla Elements que cumplen una condición
@@ -19,12 +21,11 @@ public class SelectController {
                     "JOIN Monstruo M ON E.monstruo_id = M.id " +
                     "WHERE E.element_name LIKE ?";
 
-    // Método para seleccionar elementos de la tabla Elements que cumplen una condición
-    public static void selectElementsWithCondition(String condition) {
-        // Formatea la consulta con la condición proporcionada
-        String queryWithCondition = String.format(SELECT_ELEMENTS_WITH_CONDITION, condition);
-        executeQuery(queryWithCondition);
-    }
+    /**
+     * Método para seleccionar la ID y el nombre de los monstruos por especie.
+     *
+     * @param especie Especie de los monstruos a consultar.
+     */
 
     // Método para seleccionar la ID y el nombre de los monstruos por especie
     public static void selectMonstruosByEspecie(String especie) {
@@ -70,6 +71,12 @@ public class SelectController {
             }
         }
     }
+
+    /**
+     * Método para seleccionar elementos de la tabla Elements que contienen un texto específico.
+     *
+     * @param searchText Texto a buscar en los elementos.
+     */
     // Método para seleccionar elementos de la tabla Elements que contienen un texto específico
     public static void selectElementsContainingText(String searchText) {
         String query = SELECT_ELEMENTS_CONTAINING_TEXT_WITH_MONSTER_NAME;
@@ -117,6 +124,12 @@ public class SelectController {
             }
         }
     }
+
+    /**
+     * Método genérico para ejecutar una consulta y mostrar los resultados.
+     *
+     * @param query Consulta SQL a ejecutar.
+     */
 
     // Método genérico para ejecutar una consulta y mostrar los resultados
     private static void executeQuery(String query) {
